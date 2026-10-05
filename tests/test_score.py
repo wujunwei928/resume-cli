@@ -2,7 +2,7 @@
 
 import json
 
-from conftest import visible_output
+from conftest import stdout_json, visible_output
 
 from resume_cli.cli import app
 
@@ -16,13 +16,13 @@ SCORE_KEYS = (
 )
 
 
-def test_mock_score_outputs_result_json(runner, example_resume):
+def test_mock_score_outputs_result_json(cmd, runner, example_resume):
     jd = example_resume.parent / "jd.txt"
     result = runner.invoke(
-        app, ["score", str(example_resume), "--jd", str(jd), "--mock"]
+        cmd, ["score", str(example_resume), "--jd", str(jd), "--mock"]
     )
     assert result.exit_code == 0, visible_output(result)
-    data = json.loads(result.output)
+    data = stdout_json(result)
     for key in SCORE_KEYS:
         assert key in data, f"缺少字段 {key}"
     for key in SCORE_KEYS[:4]:
@@ -32,7 +32,7 @@ def test_mock_score_outputs_result_json(runner, example_resume):
     assert data["mock"] is True
 
 
-def test_score_rejects_out_of_range_from_ai(runner, example_resume, monkeypatch):
+def test_score_rejects_out_of_range_from_ai(cmd, runner, example_resume, monkeypatch):
     class OutOfRangeClient:
         def complete(self, system: str, user: str) -> str:
             return json.dumps(
@@ -51,24 +51,24 @@ def test_score_rejects_out_of_range_from_ai(runner, example_resume, monkeypatch)
 
     monkeypatch.setattr(cli_module, "_make_client", lambda mock: OutOfRangeClient())
     jd = example_resume.parent / "jd.txt"
-    result = runner.invoke(app, ["score", str(example_resume), "--jd", str(jd)])
+    result = runner.invoke(cmd, ["score", str(example_resume), "--jd", str(jd)])
     assert result.exit_code == 1
     assert "校验" in visible_output(result)
 
 
-def test_jd_file_not_found(runner, example_resume, tmp_path):
+def test_jd_file_not_found(cmd, runner, example_resume, tmp_path):
     result = runner.invoke(
-        app, ["score", str(example_resume), "--jd", str(tmp_path / "no_jd.txt"), "--mock"]
+        cmd, ["score", str(example_resume), "--jd", str(tmp_path / "no_jd.txt"), "--mock"]
     )
     assert result.exit_code == 1
     assert "不存在" in visible_output(result)
 
 
-def test_jd_file_empty(runner, example_resume, tmp_path):
+def test_jd_file_empty(cmd, runner, example_resume, tmp_path):
     empty_jd = tmp_path / "empty.txt"
     empty_jd.write_text("", encoding="utf-8")
     result = runner.invoke(
-        app, ["score", str(example_resume), "--jd", str(empty_jd), "--mock"]
+        cmd, ["score", str(example_resume), "--jd", str(empty_jd), "--mock"]
     )
     assert result.exit_code == 1
     assert "为空" in visible_output(result)

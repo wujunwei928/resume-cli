@@ -1,5 +1,6 @@
 """PDF 简历文本提取：pdfplumber 封装与四类文件异常。"""
 
+from dataclasses import dataclass
 from pathlib import Path
 
 import pdfplumber
@@ -9,8 +10,16 @@ from .exceptions import EmptyPdfTextError, NotAPdfError, PdfFileNotFoundError, P
 _PDF_MAGIC = b"%PDF-"
 
 
-def extract_text(path: Path) -> str:
-    """读取本地 PDF 简历并返回全部文本。
+@dataclass
+class ExtractedText:
+    """提取结果：纯文本与来源页数。"""
+
+    text: str
+    pages: int
+
+
+def extract_text(path: Path) -> ExtractedText:
+    """读取本地 PDF 简历，返回文本与页数。
 
     依次处理：文件不存在 → 非 PDF → 无法读取 → 文本为空。
     """
@@ -36,4 +45,4 @@ def extract_text(path: Path) -> str:
         raise EmptyPdfTextError(
             f"PDF 文本为空：{path}\n该文件可能是不含文字层的扫描件，本工具暂不支持 OCR。"
         )
-    return text
+    return ExtractedText(text=text, pages=len(pages))

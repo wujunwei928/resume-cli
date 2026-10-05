@@ -4,16 +4,16 @@ import json
 
 import pytest
 
-from conftest import visible_output
+from conftest import stdout_json, visible_output
 
 from resume_cli.cli import app
 from resume_cli.exceptions import ResumeCliError
 
 
-def test_mock_extract_outputs_profile_json(runner, example_resume):
-    result = runner.invoke(app, ["extract", str(example_resume), "--mock"])
+def test_mock_extract_outputs_profile_json(cmd, runner, example_resume):
+    result = runner.invoke(cmd, ["extract", str(example_resume), "--mock"])
     assert result.exit_code == 0, result.output
-    data = json.loads(result.output)
+    data = stdout_json(result)
     for key in ("name", "phone", "email", "city", "education", "skills"):
         assert key in data, f"缺少字段 {key}"
     assert data["mock"] is True
@@ -21,22 +21,22 @@ def test_mock_extract_outputs_profile_json(runner, example_resume):
     assert "Python" in data["skills"]
 
 
-def test_mock_extract_identifies_contact_from_text(runner, example_resume):
+def test_mock_extract_identifies_contact_from_text(cmd, runner, example_resume):
     """mock 承诺：姓名/电话/邮箱直接识别自简历文本，而非全预置。"""
-    result = runner.invoke(app, ["extract", str(example_resume), "--mock"])
-    data = json.loads(result.output)
+    result = runner.invoke(cmd, ["extract", str(example_resume), "--mock"])
+    data = stdout_json(result)
     assert data["name"] == "张伟明"
     assert data["phone"] == "138-0013-8000"
     assert data["email"] == "zhangweiming@example.com"
 
 
-def test_mock_extract_marks_mock_true(runner, example_resume):
-    result = runner.invoke(app, ["extract", str(example_resume), "--mock"])
-    assert json.loads(result.output)["mock"] is True
+def test_mock_extract_marks_mock_true(cmd, runner, example_resume):
+    result = runner.invoke(cmd, ["extract", str(example_resume), "--mock"])
+    assert stdout_json(result)["mock"] is True
 
 
 def test_missing_key_without_mock_gives_guidance(
-    runner, example_resume, monkeypatch
+    cmd, runner, example_resume, monkeypatch
 ):
     for var in (
         "DEEPSEEK_API_KEY",
@@ -47,14 +47,14 @@ def test_missing_key_without_mock_gives_guidance(
         "OPENAI_BASE_URL",
     ):
         monkeypatch.delenv(var, raising=False)
-    result = runner.invoke(app, ["extract", str(example_resume)])
+    result = runner.invoke(cmd, ["extract", str(example_resume)])
     assert result.exit_code == 1
     combined = visible_output(result)
     assert "API Key" in combined or "api key" in combined.lower()
     assert "--mock" in combined
 
 
-def test_ai_failure_reports_clear_error(runner, example_resume, monkeypatch):
+def test_ai_failure_reports_clear_error(cmd, runner, example_resume, monkeypatch):
     class FailingClient:
         def complete(self, system: str, user: str) -> str:
             raise ResumeCliError("AI 调用失败：网络错误，请检查网络后重试。")
@@ -62,12 +62,12 @@ def test_ai_failure_reports_clear_error(runner, example_resume, monkeypatch):
     import resume_cli.cli as cli_module
 
     monkeypatch.setattr(cli_module, "_make_client", lambda mock: FailingClient())
-    result = runner.invoke(app, ["extract", str(example_resume)])
+    result = runner.invoke(cmd, ["extract", str(example_resume)])
     assert result.exit_code == 1
     assert "AI 调用失败" in visible_output(result)
 
 
-def test_extract_rejects_invalid_ai_payload(runner, example_resume, monkeypatch):
+def test_extract_rejects_invalid_ai_payload(cmd, runner, example_resume, monkeypatch):
     class GarbageClient:
         def complete(self, system: str, user: str) -> str:
             return "抱歉，我无法处理该文档。"
@@ -75,7 +75,7 @@ def test_extract_rejects_invalid_ai_payload(runner, example_resume, monkeypatch)
     import resume_cli.cli as cli_module
 
     monkeypatch.setattr(cli_module, "_make_client", lambda mock: GarbageClient())
-    result = runner.invoke(app, ["extract", str(example_resume)])
+    result = runner.invoke(cmd, ["extract", str(example_resume)])
     assert result.exit_code == 1
     assert "JSON" in result.output or "校验" in result.output
 

@@ -2,7 +2,7 @@
 
 import json
 
-from conftest import visible_output
+from conftest import stdout_json, visible_output
 
 from resume_cli.cli import app
 
@@ -30,34 +30,34 @@ class SequenceClient:
         return self._responses.pop(0)
 
 
-def _invoke_extract(runner, example_resume, monkeypatch, client):
+def _invoke_extract(cmd, runner, example_resume, monkeypatch, client):
     import resume_cli.cli as cli_module
 
     monkeypatch.setattr(cli_module, "_make_client", lambda mock: client)
-    return runner.invoke(app, ["extract", str(example_resume)])
+    return runner.invoke(cmd, ["extract", str(example_resume)])
 
 
-def test_retry_once_after_garbage_then_succeeds(runner, example_resume, monkeypatch):
+def test_retry_once_after_garbage_then_succeeds(cmd, runner, example_resume, monkeypatch):
     client = SequenceClient(["抱歉，我无法处理。", json.dumps(GOOD_PROFILE, ensure_ascii=False)])
-    result = _invoke_extract(runner, example_resume, monkeypatch, client)
+    result = _invoke_extract(cmd, runner, example_resume, monkeypatch, client)
     assert result.exit_code == 0, visible_output(result)
-    assert json.loads(result.output)["name"] == "张伟明"
+    assert stdout_json(result)["name"] == "张伟明"
     assert len(client.calls) == 2  # 恰好重试一次
     assert "修正" in client.calls[1]  # 重试 prompt 携带修正要求
 
 
-def test_retry_once_after_invalid_schema_then_succeeds(runner, example_resume, monkeypatch):
+def test_retry_once_after_invalid_schema_then_succeeds(cmd, runner, example_resume, monkeypatch):
     bad = {"name": "张伟明"}  # 缺 education，校验失败
     client = SequenceClient([json.dumps(bad, ensure_ascii=False), json.dumps(GOOD_PROFILE, ensure_ascii=False)])
-    result = _invoke_extract(runner, example_resume, monkeypatch, client)
+    result = _invoke_extract(cmd, runner, example_resume, monkeypatch, client)
     assert result.exit_code == 0, visible_output(result)
     assert len(client.calls) == 2
     assert "education" in client.calls[1]  # 校验错误被拼进重试 prompt
 
 
-def test_fails_after_second_bad_output_with_raw_preview(runner, example_resume, monkeypatch):
+def test_fails_after_second_bad_output_with_raw_preview(cmd, runner, example_resume, monkeypatch):
     client = SequenceClient(["垃圾输出甲", "垃圾输出乙丙丁"])
-    result = _invoke_extract(runner, example_resume, monkeypatch, client)
+    result = _invoke_extract(cmd, runner, example_resume, monkeypatch, client)
     assert result.exit_code == 1
     combined = visible_output(result)
     assert "两次" in combined
