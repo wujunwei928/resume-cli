@@ -22,3 +22,15 @@ class PdfUnreadableError(ResumeCliError):
 
 class EmptyPdfTextError(ResumeCliError):
     """PDF 可打开但提取不到文本（如纯扫描件）。"""
+
+
+class ConfigurationError(ResumeCliError):
+    """运行所需配置缺失（如 API Key 未配置）。"""
+
+
+class AICallError(ResumeCliError):
+    """AI 调用失败（网络 / 鉴权 / 限流 / 超时等）。"""
+
+
+class JsonParseError(ResumeCliError):
+    """AI 返回内容中无法解析出 JSON 对象。"""
