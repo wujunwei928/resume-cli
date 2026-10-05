@@ -44,6 +44,7 @@ def test_missing_key_without_mock_gives_guidance(
         "OPENAI_API_KEY",
         "MOONSHOT_API_KEY",
         "ANTHROPIC_API_KEY",
+        "OPENROUTER_API_KEY",
         "OPENAI_BASE_URL",
     ):
         monkeypatch.delenv(var, raising=False)
@@ -83,5 +84,7 @@ def test_extract_rejects_invalid_ai_payload(cmd, runner, example_resume, monkeyp
 @pytest.fixture(autouse=True)
 def _clean_key_env(monkeypatch):
     """隔离外部环境，避免真实 Key 影响测试分支。"""
-    for var in ("DEEPSEEK_API_KEY", "ZHIPUAI_API_KEY", "OPENAI_API_KEY"):
+    from resume_cli.config import KNOWN_KEY_VARS
+
+    for var in KNOWN_KEY_VARS:
         monkeypatch.delenv(var, raising=False)

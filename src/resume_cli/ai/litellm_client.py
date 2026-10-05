@@ -14,7 +14,7 @@ logging.getLogger("LiteLLM").setLevel(logging.ERROR)
 
 
 class LiteLLMClient:
-    def __init__(self, model: str, timeout: float = 60.0) -> None:
+    def __init__(self, model: str, timeout: float) -> None:
         self._model = model
         self._timeout = timeout
 
@@ -41,6 +41,8 @@ class LiteLLMClient:
                 timeout=self._timeout,
                 **kwargs,
             )
+        except litellm.exceptions.BadRequestError:
+            raise  # 交由上层 complete() 降级处理，勿包装成 AICallError
         except litellm.exceptions.AuthenticationException as exc:
             raise AICallError(
                 f"AI 调用失败：API Key 无效或未授权（模型 {self._model}）。\n"

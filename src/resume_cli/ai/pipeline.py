@@ -8,7 +8,7 @@ import logging
 from pydantic import BaseModel, ValidationError
 
 from ..exceptions import AIOutputInvalidError, JsonParseError
-from ..json_utils import parse_model_json
+from ..json_utils import parse_model_json, preview
 from .base import AIClient
 
 log = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ def run_structured_task(client: AIClient, system: str, user: str, model_cls: typ
                 f"AI 两次输出均未通过校验，已停止重试。\n"
                 f"第一次问题：{_brief(first_problem)}\n"
                 f"重试后问题：{_brief(second_problem)}\n"
-                f"最后一次原始响应：{_raw_preview(raw)}"
+                f"最后一次原始响应：{preview(raw)}"
             ) from second_problem
 
 
@@ -45,7 +45,3 @@ def _brief(problem: Exception) -> str:
         for e in problem.errors()[:3]
     )
     return f"字段校验失败：{details}"
-
-
-def _raw_preview(raw: str) -> str:
-    return raw[:200].replace("\n", " ")

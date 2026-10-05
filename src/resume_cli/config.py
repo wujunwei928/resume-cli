@@ -3,6 +3,7 @@
 import os
 
 DEFAULT_MODEL = "deepseek/deepseek-flash"
+DEFAULT_TIMEOUT_SECONDS = 60.0
 
 # litellm 认识的常见提供商 Key 变量；新增提供商时在此追加
 KNOWN_KEY_VARS = (
@@ -22,9 +23,9 @@ def resolve_model() -> str:
 
 def resolve_timeout() -> float:
     try:
-        return float(os.environ.get("RESUME_CLI_TIMEOUT", "60"))
+        return float(os.environ.get("RESUME_CLI_TIMEOUT", DEFAULT_TIMEOUT_SECONDS))
     except ValueError:
-        return 60.0
+        return DEFAULT_TIMEOUT_SECONDS
 
 
 def detect_api_key() -> str | None:

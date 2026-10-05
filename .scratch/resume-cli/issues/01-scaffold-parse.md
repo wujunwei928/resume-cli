@@ -6,9 +6,9 @@
 
 **Status:** ready-for-agent
 
-- [ ] `uv sync` 后 `resume-cli --help` 与 `resume-cli parse --help` 正常显示用法
-- [ ] `resume-cli parse examples/resume.pdf` 输出完整中文简历文本，退出码 0
-- [ ] 文件不存在、非 PDF（魔数校验）、损坏或加密、文本为空四种情况输出区分性中文错误，退出码 1
-- [ ] 缺少必要参数等用法错误退出码 2
-- [ ] pytest 全绿：parse 正常路径 + 四类异常（CliRunner 从 CLI 边界断言）+ --help 存在性
-- [ ] examples/ 含合成中文简历 PDF（虚构人物），供演示与测试共用
+- [x] `uv sync` 后 `resume-cli --help` 与 `resume-cli parse --help` 正常显示用法
+- [x] `resume-cli parse examples/resume.pdf` 输出完整中文简历文本，退出码 0
+- [x] 文件不存在、非 PDF（魔数校验）、损坏或加密、文本为空四种情况输出区分性中文错误，退出码 1
+- [x] 缺少必要参数等用法错误退出码 2
+- [x] pytest 全绿：parse 正常路径 + 四类异常（CliRunner 从 CLI 边界断言）+ --help 存在性
+- [x] examples/ 含合成中文简历 PDF（虚构人物），供演示与测试共用

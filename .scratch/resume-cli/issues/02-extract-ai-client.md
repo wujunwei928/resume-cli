@@ -6,10 +6,10 @@
 
 **Status:** ready-for-agent
 
-- [ ] 配置 DEEPSEEK_API_KEY 后 `resume-cli extract examples/resume.pdf` 输出符合题目英文键名的画像 JSON（缩进 2），退出码 0
-- [ ] `--mock` 下同样命令零网络调用成功，输出含 `"mock": true` 字段
-- [ ] 未配置任何 Key 且未加 --mock 时，错误信息同时指引「配置 Key」与「使用 --mock」两条出路
-- [ ] AI 调用失败（网络错误 / 鉴权失败 / 超时）错误信息区分原因，退出码 1
-- [ ] 画像契约单测：缺必填字段、类型错误的 AI 返回被 pydantic 拦截报错
-- [ ] `--mock` 端到端 CLI 测试（CliRunner）全绿
-- [ ] CLI 编排层只依赖 AI 客户端接口，不感知 litellm / Mock 具体实现
+- [x] 配置 DEEPSEEK_API_KEY 后 `resume-cli extract examples/resume.pdf` 输出符合题目英文键名的画像 JSON（缩进 2），退出码 0
+- [x] `--mock` 下同样命令零网络调用成功，输出含 `"mock": true` 字段
+- [x] 未配置任何 Key 且未加 --mock 时，错误信息同时指引「配置 Key」与「使用 --mock」两条出路
+- [x] AI 调用失败（网络错误 / 鉴权失败 / 超时）错误信息区分原因，退出码 1
+- [x] 画像契约单测：缺必填字段、类型错误的 AI 返回被 pydantic 拦截报错
+- [x] `--mock` 端到端 CLI 测试（CliRunner）全绿
+- [x] CLI 编排层只依赖 AI 客户端接口，不感知 litellm / Mock 具体实现

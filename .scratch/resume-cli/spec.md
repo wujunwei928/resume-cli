@@ -81,7 +81,8 @@ Status: ready-for-agent
 - **models**：pydantic v2 模型。画像契约（Education 子模型含 school/major/degree/graduation_time；skills 为字符串列表）与评分契约（四项整数分 0-100、comment 字符串、interview_questions 字符串列表）。
 - **json_utils**：脏 JSON 修复（围栏剥离 → 首尾花括号截取 → json-repair 库兜底）。
 - **config**：环境变量集中读取（RESUME_CLI_MODEL 等），缺配置时给出指引性错误。
-- **output**：终端人类可读渲染（分数条、字段对齐）与 --output 落盘。
+- **输出**：结果以缩进 2 的 JSON 走 stdout（CLI 层统一渲染与 --output 落盘；刻意不做
+  分数条等花哨渲染，保持 stdout 纯 JSON 以保障管道重定向，spec 修订于 2026-10-05）。
 
 ### AI 接入（ADR-0001）
 

@@ -6,8 +6,8 @@
 
 **Status:** ready-for-agent
 
-- [ ] `resume-cli score examples/resume.pdf --jd examples/jd.txt`（真实或 `--mock`）输出符合题目字段的评分 JSON，退出码 0
-- [ ] examples/ 含中文 JD 文本文件
-- [ ] 四项分数均为 0-100 整数：越界、非整数的返回被校验拦截（契约单测）
-- [ ] JD 文件不存在 / 内容为空输出区分性中文错误，退出码 1
-- [ ] `--mock` 端到端 CLI 测试全绿，comment 与 interview_questions 为非空中文
+- [x] `resume-cli score examples/resume.pdf --jd examples/jd.txt`（真实或 `--mock`）输出符合题目字段的评分 JSON，退出码 0
+- [x] examples/ 含中文 JD 文本文件
+- [x] 四项分数均为 0-100 整数：越界、非整数的返回被校验拦截（契约单测）
+- [x] JD 文件不存在 / 内容为空输出区分性中文错误，退出码 1
+- [x] `--mock` 端到端 CLI 测试全绿，comment 与 interview_questions 为非空中文

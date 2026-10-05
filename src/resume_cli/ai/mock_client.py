@@ -14,8 +14,17 @@ SKILL_VOCAB = (
 )
 CITIES = ("北京", "上海", "广州", "深圳", "杭州", "成都", "武汉", "南京", "西安", "苏州")
 
+# mock 评分启发式常量：技能分 = 基础分 + 每命中一项加成（封顶）
+_SKILL_BASE, _SKILL_STEP, _SKILL_CAP = 55, 5, 95
+# 三项分加权合成总分
+_WEIGHTS = {"skill": 0.4, "experience": 0.35, "education": 0.25}
+
 _EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 _PHONE_RE = re.compile(r"1[3-9]\d[- ]?\d{4}[- ]?\d{4}")
+
+
+def _hit_skills(text: str) -> list[str]:
+    return [s for s in SKILL_VOCAB if s.lower() in text.lower()]
 
 
 def _body_text(prompt: str) -> str:
@@ -45,17 +54,21 @@ class MockClient:
                     "graduation_time": "2020",
                 }
             ],
-            "skills": [s for s in SKILL_VOCAB if s.lower() in text.lower()] or ["Python"],
+            "skills": _hit_skills(text) or ["Python"],
         }
         return json.dumps(payload, ensure_ascii=False)
 
     def _score(self, text: str) -> str:
         text = _body_text(text)
-        skills = [s for s in SKILL_VOCAB if s.lower() in text.lower()]
-        skill_score = min(55 + len(skills) * 5, 95)
+        skills = _hit_skills(text)
+        skill_score = min(_SKILL_BASE + len(skills) * _SKILL_STEP, _SKILL_CAP)
         experience_score = 78 if "至今" in text else 72
         education_score = 85 if "硕士" in text else 75
-        overall = round(skill_score * 0.4 + experience_score * 0.35 + education_score * 0.25)
+        overall = round(
+            skill_score * _WEIGHTS["skill"]
+            + experience_score * _WEIGHTS["experience"]
+            + education_score * _WEIGHTS["education"]
+        )
         payload = {
             "overall_score": overall,
             "skill_score": skill_score,

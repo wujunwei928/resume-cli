@@ -13,6 +13,11 @@ from .exceptions import JsonParseError
 _MAX_PREVIEW = 200
 
 
+def preview(raw: str, limit: int = _MAX_PREVIEW) -> str:
+    """单行化并截断的原始响应摘要，供错误信息复用。"""
+    return raw[:limit].replace("\n", " ")
+
+
 def parse_model_json(raw: str) -> dict:
     """从 AI 原始输出中解析出 JSON 对象；失败时抛出含原始摘要的错误。"""
     text = _strip_code_fence(raw).strip()
@@ -70,4 +75,4 @@ def _strip_code_fence(raw: str) -> str:
 
 
 def _preview(raw: str) -> str:
-    return raw[:_MAX_PREVIEW].replace("\n", " ")
+    return preview(raw)
