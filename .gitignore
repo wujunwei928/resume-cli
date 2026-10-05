@@ -1,0 +1,4 @@
+# 工具运行产物（video-agent-kit / video2code 插件生成）
+.v2c/
+.video_agent/
+out/
