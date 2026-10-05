@@ -36,5 +36,9 @@ class JsonParseError(ResumeCliError):
     """AI 返回内容中无法解析出 JSON 对象。"""
 
 
+class AIOutputInvalidError(ResumeCliError):
+    """AI 两次输出（含一次带修正要求的重试）均未通过解析或校验。"""
+
+
 class JdFileError(ResumeCliError):
     """JD 文件不存在或内容为空。"""

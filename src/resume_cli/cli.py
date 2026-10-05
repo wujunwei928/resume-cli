@@ -7,11 +7,11 @@ import json
 from pathlib import Path
 
 import typer
-from pydantic import ValidationError
 
 from .ai.base import AIClient
 from .ai.litellm_client import LiteLLMClient
 from .ai.mock_client import MockClient
+from .ai.pipeline import run_structured_task
 from .ai.prompts import (
     extract_user_prompt,
     EXTRACT_SYSTEM,
@@ -20,7 +20,6 @@ from .ai.prompts import (
 )
 from .config import detect_api_key, KNOWN_KEY_VARS, resolve_model, resolve_timeout
 from .exceptions import ConfigurationError, JdFileError, ResumeCliError
-from .json_utils import parse_model_json
 from .models import Profile, ScoreResult
 from .pdf_parser import extract_text
 
@@ -54,6 +53,12 @@ def _make_client(mock: bool) -> AIClient:
     return LiteLLMClient(model=resolve_model(), timeout=resolve_timeout())
 
 
+def _dump_payload(payload: dict, mock: bool) -> None:
+    if mock:
+        payload["mock"] = True
+    typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+
+
 @app.command()
 def parse(
     pdf_path: Path = typer.Argument(help="PDF 简历文件路径"),
@@ -75,22 +80,12 @@ def extract(
     try:
         text = extract_text(pdf_path)
         client = _make_client(mock)
-        raw = client.complete(EXTRACT_SYSTEM, extract_user_prompt(text))
-        data = parse_model_json(raw)
-        profile = Profile.model_validate(data)
+        profile, _ = run_structured_task(
+            client, EXTRACT_SYSTEM, extract_user_prompt(text), Profile
+        )
     except ResumeCliError as exc:
         _fail(str(exc))
-    except ValidationError as exc:
-        problems = "; ".join(
-            f"{'.'.join(str(loc) for loc in e['loc'])}: {e['msg']}"
-            for e in exc.errors()[:3]
-        )
-        _fail(f"AI 返回结果未通过字段校验：{problems}")
-
-    payload = profile.model_dump()
-    if mock:
-        payload["mock"] = True
-    typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+    _dump_payload(profile.model_dump(), mock)
 
 
 def _read_jd(jd_path: Path) -> str:
@@ -113,22 +108,12 @@ def score(
         text = extract_text(pdf_path)
         jd_text = _read_jd(jd_path)
         client = _make_client(mock)
-        raw = client.complete(SCORE_SYSTEM, score_user_prompt(text, jd_text))
-        data = parse_model_json(raw)
-        result = ScoreResult.model_validate(data)
+        result, _ = run_structured_task(
+            client, SCORE_SYSTEM, score_user_prompt(text, jd_text), ScoreResult
+        )
     except ResumeCliError as exc:
         _fail(str(exc))
-    except ValidationError as exc:
-        problems = "; ".join(
-            f"{'.'.join(str(loc) for loc in e['loc'])}: {e['msg']}"
-            for e in exc.errors()[:3]
-        )
-        _fail(f"AI 返回结果未通过字段校验：{problems}")
-
-    payload = result.model_dump()
-    if mock:
-        payload["mock"] = True
-    typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+    _dump_payload(result.model_dump(), mock)
 
 
 if __name__ == "__main__":

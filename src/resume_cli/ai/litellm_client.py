@@ -20,15 +20,27 @@ class LiteLLMClient:
 
     def complete(self, system: str, user: str) -> str:
         try:
-            response = litellm.completion(
+            # 尽力透传 JSON 模式；模型/网关不支持时去掉该参数降级重试
+            response = self._completion(system, user, json_mode=True)
+            return response.choices[0].message.content or ""
+        except litellm.exceptions.BadRequestError:
+            response = self._completion(system, user, json_mode=False)
+            return response.choices[0].message.content or ""
+
+    def _completion(self, system: str, user: str, json_mode: bool):
+        kwargs = {}
+        if json_mode:
+            kwargs["response_format"] = {"type": "json_object"}
+        try:
+            return litellm.completion(
                 model=self._model,
                 messages=[
                     {"role": "system", "content": system},
                     {"role": "user", "content": user},
                 ],
                 timeout=self._timeout,
+                **kwargs,
             )
-            return response.choices[0].message.content or ""
         except litellm.exceptions.AuthenticationException as exc:
             raise AICallError(
                 f"AI 调用失败：API Key 无效或未授权（模型 {self._model}）。\n"
