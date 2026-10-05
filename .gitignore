@@ -2,3 +2,14 @@
 .v2c/
 .video_agent/
 out/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+dist/
+build/
+*.egg-info/
+uv.lock
+
