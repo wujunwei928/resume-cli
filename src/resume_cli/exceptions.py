@@ -34,3 +34,7 @@ class AICallError(ResumeCliError):
 
 class JsonParseError(ResumeCliError):
     """AI 返回内容中无法解析出 JSON 对象。"""
+
+
+class JdFileError(ResumeCliError):
+    """JD 文件不存在或内容为空。"""

@@ -21,3 +21,14 @@ class Profile(BaseModel):
     city: str | None = None
     education: list[Education]
     skills: list[str] = Field(default_factory=list)
+
+
+class ScoreResult(BaseModel):
+    """匹配评分：score 命令的输出契约。分数一律为 0-100 整数。"""
+
+    overall_score: int = Field(ge=0, le=100)
+    skill_score: int = Field(ge=0, le=100)
+    experience_score: int = Field(ge=0, le=100)
+    education_score: int = Field(ge=0, le=100)
+    comment: str
+    interview_questions: list[str] = Field(default_factory=list)

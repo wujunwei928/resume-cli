@@ -49,8 +49,29 @@ class MockClient:
         }
         return json.dumps(payload, ensure_ascii=False)
 
-    def _score(self, text: str) -> str:  # 工单 03 实现
-        raise NotImplementedError
+    def _score(self, text: str) -> str:
+        text = _body_text(text)
+        skills = [s for s in SKILL_VOCAB if s.lower() in text.lower()]
+        skill_score = min(55 + len(skills) * 5, 95)
+        experience_score = 78 if "至今" in text else 72
+        education_score = 85 if "硕士" in text else 75
+        overall = round(skill_score * 0.4 + experience_score * 0.35 + education_score * 0.25)
+        payload = {
+            "overall_score": overall,
+            "skill_score": skill_score,
+            "experience_score": experience_score,
+            "education_score": education_score,
+            "comment": (
+                f"候选人具备较扎实的全栈开发基础，命中 {len(skills)} 项岗位相关技能，"
+                "工程经历完整；简历中未明确体现大模型 API 的深度实践，建议面试重点确认。"
+            ),
+            "interview_questions": [
+                "请介绍一个你主导过的全栈项目，以及你在其中的角色。",
+                "你是否有调用大模型 API 的实际经验？请举例说明。",
+                "你如何保证项目的工程质量（测试、CI、文档）？",
+            ],
+        }
+        return json.dumps(payload, ensure_ascii=False)
 
     @staticmethod
     def _guess_name(text: str) -> str:
