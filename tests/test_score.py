@@ -72,3 +72,21 @@ def test_jd_file_empty(cmd, runner, example_resume, tmp_path):
     )
     assert result.exit_code == 1
     assert "为空" in visible_output(result)
+
+
+def test_jd_file_not_utf8(cmd, runner, example_resume, tmp_path):
+    gbk_jd = tmp_path / "jd-gbk.txt"
+    gbk_jd.write_bytes("岗位：后端工程师，精通 Python".encode("gbk"))
+    result = runner.invoke(
+        cmd, ["score", str(example_resume), "--jd", str(gbk_jd), "--mock"]
+    )
+    assert result.exit_code == 1
+    assert "UTF-8" in visible_output(result)
+
+
+def test_jd_path_is_directory(cmd, runner, example_resume, tmp_path):
+    result = runner.invoke(
+        cmd, ["score", str(example_resume), "--jd", str(tmp_path), "--mock"]
+    )
+    assert result.exit_code == 1
+    assert "不是文件" in visible_output(result)

@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [project.scripts]
-resume-cli = "resume_cli.cli:app"
+resume-cli = "resume_cli.cli:main"
 
 [dependency-groups]
 dev = [

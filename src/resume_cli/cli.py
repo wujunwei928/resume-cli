@@ -124,7 +124,16 @@ def extract(
 def _read_jd(jd_path: Path) -> str:
     if not jd_path.exists():
         raise JdFileError(f"JD 文件不存在：{jd_path}\n请检查 --jd 参数指向的路径。")
-    jd_text = jd_path.read_text(encoding="utf-8").strip()
+    if not jd_path.is_file():
+        raise JdFileError(f"JD 路径不是文件：{jd_path}\n请提供 JD 文本文件的路径。")
+    try:
+        jd_text = jd_path.read_text(encoding="utf-8").strip()
+    except UnicodeDecodeError as exc:
+        raise JdFileError(
+            f"JD 文件不是 UTF-8 编码：{jd_path}\n请将文件另存为 UTF-8 编码后重试。"
+        ) from exc
+    except OSError as exc:
+        raise JdFileError(f"无法读取 JD 文件：{jd_path}\n原始错误：{exc}") from exc
     if not jd_text:
         raise JdFileError(f"JD 文件内容为空：{jd_path}\n请提供包含岗位描述的文本文件。")
     log.info("JD 读取完成：%s（%d 字符）", jd_path, len(jd_text))
@@ -152,5 +161,14 @@ def score(
     _dump_payload(result.model_dump(), mock, output)
 
 
+def main() -> None:
+    """入口：Ctrl/Cmd+C 收敛为干净提示与退出码 130（128+SIGINT），不甩 traceback。"""
+    try:
+        app()
+    except KeyboardInterrupt:
+        typer.secho("\n已取消。", fg=typer.colors.YELLOW, err=True)
+        raise SystemExit(130)
+
+
 if __name__ == "__main__":
-    app()
+    main()

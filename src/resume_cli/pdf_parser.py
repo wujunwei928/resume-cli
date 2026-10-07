@@ -27,8 +27,13 @@ def extract_text(path: Path) -> ExtractedText:
     if not path.exists():
         raise PdfFileNotFoundError(f"文件不存在：{path}\n请检查路径是否正确。")
 
-    with path.open("rb") as f:
-        head = f.read(len(_PDF_MAGIC))
+    try:
+        with path.open("rb") as f:
+            head = f.read(len(_PDF_MAGIC))
+    except OSError as exc:  # 目录、无读取权限等文件系统层错误统一收敛
+        raise PdfUnreadableError(
+            f"PDF 无法读取：{path}\n路径可能是目录或无读取权限。原始错误：{exc}"
+        ) from exc
     if head != _PDF_MAGIC:
         raise NotAPdfError(f"文件不是 PDF：{path}\n请提供 PDF 格式的简历文件。")
 

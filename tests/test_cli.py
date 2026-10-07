@@ -72,3 +72,21 @@ class TestParse:
         result = runner.invoke(cmd, ["parse", str(blank)])
         assert result.exit_code == BUSINESS_EXIT_CODE
         assert "文本为空" in visible_output(result)
+
+    def test_directory_path(self, cmd, runner, tmp_path):
+        result = runner.invoke(cmd, ["parse", str(tmp_path)])
+        assert result.exit_code == BUSINESS_EXIT_CODE
+        assert "无法读取" in visible_output(result)
+
+
+class TestMain:
+    def test_keyboard_interrupt_exits_cleanly(self, monkeypatch):
+        from resume_cli import cli as cli_module
+
+        def interrupted():
+            raise KeyboardInterrupt
+
+        monkeypatch.setattr(cli_module, "app", interrupted)
+        with pytest.raises(SystemExit) as exc_info:
+            cli_module.main()
+        assert exc_info.value.code == 130
