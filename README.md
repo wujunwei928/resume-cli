@@ -77,7 +77,7 @@ docker run --rm resume-cli extract /app/examples/resume.pdf --mock
 
 ## CLI 命令说明
 
-所有命令支持 `--help` 查看用法。`--verbose` 为全局选项，需放在子命令之前。
+所有命令支持 `--help`（或简写 `-h`）查看用法。`--verbose` 为全局选项，需放在子命令之前。
 
 ### `resume-cli parse <pdf_path>`
 

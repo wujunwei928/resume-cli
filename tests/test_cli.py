@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import pytest
 from conftest import visible_output
 
 from resume_cli.cli import app
@@ -20,6 +21,13 @@ class TestHelp:
         result = runner.invoke(cmd, ["parse", "--help"])
         assert result.exit_code == 0
         assert "PDF" in result.output
+
+    @pytest.mark.parametrize("subcommand", [[], ["parse"], ["extract"], ["score"]])
+    def test_short_help_equals_long_help(self, cmd, runner, subcommand):
+        short = runner.invoke(cmd, [*subcommand, "-h"])
+        long = runner.invoke(cmd, [*subcommand, "--help"])
+        assert short.exit_code == 0
+        assert short.output == long.output
 
 
 class TestParse:
