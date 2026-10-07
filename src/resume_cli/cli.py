@@ -1,6 +1,7 @@
 """命令行入口：子命令定义与编排。
 
-stdout 只放结果，日志与错误走 stderr；业务错误退出码 1，用法错误由 typer 产生退出码 2。
+stdout 只放结果，日志与错误走 stderr；业务错误退出码 1，用法错误由 typer 产生退出码 2，
+裸执行（无子命令）打印帮助并以 0 退出。
 """
 
 import json
@@ -30,17 +31,22 @@ log = logging.getLogger(__name__)
 
 app = typer.Typer(
     help="AI 简历解析 CLI：提取 PDF 文本、结构化简历画像、JD 匹配评分。",
-    no_args_is_help=True,
     context_settings={"help_option_names": ["-h", "--help"]},
 )
 
 
-@app.callback()
+@app.callback(invoke_without_command=True)
 def _root(
+    ctx: typer.Context,
     verbose: bool = typer.Option(False, "--verbose", help="输出 DEBUG 级调试日志（含 prompt 摘要）"),
 ) -> None:
     """resume-cli —— AI 简历解析命令行工具。"""
     setup_logging(verbose=verbose)
+    if ctx.invoked_subcommand is None:
+        # 裸执行或只给全局选项时：打印帮助并以 0 退出（类 Unix 成功惯例）。
+        # 不用 no_args_is_help——click 8.5 将其实现为 UsageError，退出码为 2。
+        typer.echo(ctx.get_help())
+        raise typer.Exit(code=0)
 
 
 def _fail(message: str) -> None:

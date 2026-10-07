@@ -29,6 +29,19 @@ class TestHelp:
         assert short.exit_code == 0
         assert short.output == long.output
 
+    def test_bare_invocation_shows_help_and_exits_zero(self, cmd, runner):
+        """裸执行打印帮助并以 0 退出（类 Unix 成功惯例）。"""
+        result = runner.invoke(cmd, [])
+        assert result.exit_code == 0
+        assert "parse" in result.output
+        assert "extract" in result.output
+
+    def test_global_option_without_subcommand_shows_help_and_exits_zero(self, cmd, runner):
+        """只给全局选项、无子命令时同样打印帮助并以 0 退出。"""
+        result = runner.invoke(cmd, ["--verbose"])
+        assert result.exit_code == 0
+        assert "score" in result.output
+
 
 class TestParse:
     def test_usage_error_without_args(self, cmd, runner):

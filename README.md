@@ -178,7 +178,7 @@ Python / JavaScript / TypeScript / React / FastAPI / Docker / MySQL
 - [x] 简单日志（INFO 关键节点走 stderr，`--verbose` 升 DEBUG 含 prompt 摘要）
 - [x] Dockerfile 与 Makefile（`make demo-*` 一键复现演示）
 
-测试：44 项 pytest（CLI 边界端到端、JSON 修复各形态、pydantic 契约、重试语义、真实子进程重定向纯净性）。
+测试：`uv run pytest -q` 一键运行，覆盖 CLI 边界端到端、JSON 修复各形态、pydantic 契约、重试语义与真实子进程重定向纯净性。
 
 ## 已知问题或未完成内容
 
@@ -206,7 +206,7 @@ src/resume_cli/
 ├── config.py       # 环境变量集中读取
 ├── log.py          # 日志初始化（stderr 分流）
 └── exceptions.py   # 业务异常体系
-tests/              # 44 项测试（CLI 接缝为主）
+tests/              # pytest 测试（CLI 接缝为主，运行方式见「开发」节）
 examples/           # 合成示例简历与 JD
 ```
 
