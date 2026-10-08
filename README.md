@@ -10,6 +10,10 @@ resume-cli score  ./resume.pdf --jd ./jd.txt   # AI 匹配评分（四项 0-100 
 
 三个命令均支持 `--mock` 本地演示模式（无需 API Key）与 `--output result.json` 结果落盘。
 
+## 演示视频
+
+[使用介绍演示视频（2 分 35 秒，1080p）](https://github.com/wujunwei928/resume-cli/releases/download/v0.1.0/resume-cli-intro.mp4)——覆盖安装与运行、三个命令逐一演示与项目结构讲解。
+
 ## 项目简介
 
 在招聘流程中，快速理解候选人简历并判断其与岗位的匹配程度是一项常见但耗时的工作。
